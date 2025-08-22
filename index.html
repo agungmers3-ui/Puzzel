@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #1e293b;
+      font-family: Arial, sans-serif;
+      color: white;
+      flex-direction: column;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-template-rows: repeat(4, 80px);
+      gap: 5px;
+    }
+
+    .tile {
+      background: #3b82f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tile:hover {
+      background: #2563eb;
+    }
+
+    .empty {
+      background: #1e293b;
+      cursor: default;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #10b981;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+    }
+
+    button:hover {
+      background: #059669;
+    }
+  </style>
+</head>
+<body>
+  <h1>Puzzle Game</h1>
+  <div class="board" id="board"></div>
+  <button onclick="shuffle()">Shuffle</button>
+
+  <script>
+    const board = document.getElementById("board");
+    let tiles = [];
+
+    function init() {
+      tiles = [...Array(15).keys()].map(x => x + 1);
+      tiles.push(null); // empty space
+      render();
+    }
+
+    function render() {
+      board.innerHTML = "";
+      tiles.forEach((tile, index) => {
+        const div = document.createElement("div");
+        div.className = "tile";
+        if (tile === null) {
+          div.classList.add("empty");
+        } else {
+          div.textContent = tile;
+          div.onclick = () => move(index);
+        }
+        board.appendChild(div);
+      });
+    }
+
+    function move(index) {
+      const emptyIndex = tiles.indexOf(null);
+      const validMoves = [emptyIndex - 1, emptyIndex + 1, emptyIndex - 4, emptyIndex + 4];
+
+      if (validMoves.includes(index) && isAdjacent(index, emptyIndex)) {
+        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+        render();
+        checkWin();
+      }
+    }
+
+    function isAdjacent(i, j) {
+      if (i < 0 || i > 15 || j < 0 || j > 15) return false;
+      const xi = i % 4, yi = Math.floor(i / 4);
+      const xj = j % 4, yj = Math.floor(j / 4);
+      return Math.abs(xi - xj) + Math.abs(yi - yj) === 1;
+    }
+
+    function shuffle() {
+      for (let i = 0; i < 200; i++) {
+        const emptyIndex = tiles.indexOf(null);
+        const possibleMoves = [emptyIndex - 1, emptyIndex + 1, emptyIndex - 4, emptyIndex + 4].filter(i => i >= 0 && i < 16 && isAdjacent(i, emptyIndex));
+        const moveIndex = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+        [tiles[moveIndex], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[moveIndex]];
+      }
+      render();
+    }
+
+    function checkWin() {
+      const correct = [...Array(15).keys()].map(x => x + 1).concat([null]);
+      if (JSON.stringify(tiles) === JSON.stringify(correct)) {
+        setTimeout(() => alert("🎉 Kamu Menang!"), 100);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
